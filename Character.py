@@ -2,18 +2,12 @@ from pprint import pprint
 from random import randrange
 import questionary
 import template
+from Object import Potion
 
 XP_FROM_1_TO_2 = 5
 XP_FROM_2_TO_3 = 10
 XP_FROM_3_TO_4 = 20
 XP_FROM_4_TO_5 = 50
-
-
-def strike(text):
-    result = ''
-    for c in text:
-        result = result + c + '\u0336'
-    return result
 
 
 class Character:
@@ -62,42 +56,68 @@ class Character:
         print(f"### You meet a {enemy.name} ! ###")
         print("")
         print(f"{enemy.name} is level {enemy.level}")
-        print(f"{enemy.name} has {e.hp} hp")
-        print(f"{enemy.name} has this weapon in left hand : {enemy.left_weapon}")
-        print(f"{enemy.name} has this weapon in right hand : {enemy.right_weapon}")
+        print(f"{enemy.name} has {enemy.hp} hp")
+        print(
+            f"{enemy.name} have this weapon equiped in left hand : {enemy.left_weapon}") if enemy.left_weapon else print(
+            f"{enemy.name} has no left weapon !")
+        print(
+            f"{enemy.name} have this weapon equiped in right hand : {enemy.right_weapon}") if enemy.right_weapon else print(
+            f"{enemy.name} has no right weapon !")
         print("")
         print(f"You are level {self.level}")
         print(f"You have {self.hp} hp")
-        print(f"You have this weapon equiped in left hand : {self.left_weapon}")
-        print(f"You have this weapon equiped in right hand : {self.right_weapon}")
+        print(f"You have this weapon equiped in left hand : {self.left_weapon}") if self.left_weapon else print(
+            "You have no left weapon !")
+        print(f"You have this weapon equiped in right hand : {self.right_weapon}") if self.right_weapon else print(
+            "You have no right weapon !")
+
         print("")
 
         run_away = False
-        choose = 0
+        #        choose = 0
         while enemy.is_alive and self.is_alive and not run_away:
             print("")
-            while choose < 1 or choose > 3:
-                print("### What do you want to do ? ###")
-                print("1. Start attacking")
-                print("2. Open your inventory")
-                print("3. Try to run away")
-                choose = 1 if self.pass_next_turn else int(input())
-            if choose == 1:
-                self.attack(e)
-            elif choose == 2:
+            #            while choose < 1 or choose > 3:
+            #                print("### What do you want to do ? ###")
+            #                print("1. Start attacking")
+            #                print("2. Open your inventory")
+            #                print("3. Try to run away")
+            #                choose = 1 if self.pass_next_turn else int(input())
+
+            message = "### What do you want to do ? ###"
+            fight_menu = [
+                "Start attacking",
+                "Open your inventory",
+                "Try to run away"
+            ]
+            if not self.pass_next_turn:
+                choose = questionary.select(
+                    message,
+                    choices=fight_menu,
+                    use_arrow_keys=True,
+                    show_selected=False,
+                ).ask()
+            else:
+                choose = "Start attacking"
+
+            if choose == "Start attacking":
+                self.attack(enemy)
+            elif choose == "Open your inventory":
                 self.open_inventory()
-            elif choose == 3:
+            elif choose == "Try to run away":
                 run = randrange(2)
                 if run == 0:
                     print("# You fail to run away #")
+                    print("# You will pass your next turn")
+                    self.pass_next_turn = True
                 else:
                     print("# You run away ! #")
                     run_away = True
-            choose = 0
 
     def attack(self, enemy):
         coef = self._get_coef(enemy)
         if not self.pass_next_turn:
+            print("")
             print(f"You decide to attack {enemy.name}")
             damage = round(randrange(5, 10) * coef, 2)
             if damage == 0:
@@ -118,7 +138,7 @@ class Character:
                     return
         else:
             print("")
-            print("YOU USE A POTION LAST TURN, YOU HAVE TO SKIP THIS ONE ! ")
+            print("SORRY, YOU HAVE TO SKIP THIS TURN ! ")
             print("")
             self.pass_next_turn = False
 
@@ -193,8 +213,7 @@ class Player(Character):
         }
 
     def open_inventory(self):
-        usage = -1
-        key_list = []
+        print("")
         message = "# You take a look at your bag. You have this objects # "
         inventory_list = [f"{object_name} : {object_quantity}" for object_name, object_quantity in
                           self.inventory.items() if object_quantity]
@@ -207,13 +226,6 @@ class Player(Character):
         ).ask()
 
         object_name = 0 if answer == "<< GO BACK" else answer.split(':')[0].strip()
-
-        # for object_name, object_quantity in self.inventory.items():
-        #    if not object_quantity:
-        #        print(strike(f"{object_name.upper()} : {object_quantity}"))
-        #   else:
-        #      print(f"{object_name.upper()} : {object_quantity}")
-        # print("0. GO BACK")
 
         # Return to previous menu
         if object_name == 0:
@@ -228,47 +240,6 @@ class Player(Character):
             potion.use(object_name, self)
             # Update object in inventory
             self.inventory[object_name] -= 1
-
-
-class Object:
-    def __init__(self, object_name):
-        self.name = object_name
-        self.usable = True
-
-    def __str__(self):
-        return self.name
-
-
-class Potion(Object):
-    def __init__(self, object_name):
-        super().__init__(object_name)
-        self.level = 1
-        self.hp_healed = randrange(15, 50)
-        self.compute_potion(Potion)
-
-    def compute_potion(self, object_name):
-        if self.name == "Super Potion":
-            self.level = 2
-            self.hp_healed = randrange(30, 60)
-        elif self.name == "Maxi Potion":
-            self.level = 3
-            self.hp_healed = randrange(40, 80)
-
-    def use(self, object_name, player):
-        if object_name in ["Potion", "Super Potion", "Maxi Potion"]:
-            print("")
-            print(f"HP potion heal you for {self.hp_healed}")
-            player.hp += self.hp_healed
-            if player.hp > player.max_hp:
-                player.hp = player.max_hp
-            print(f"You have now {player.hp}")
-            player.pass_next_turn = True
-
-
-class Weapon(Object):
-    def __init__(self, object_name):
-        super().__init__(object_name)
-        self.usable = False
 
 
 class Enemy(Character):
@@ -293,6 +264,6 @@ class Enemy(Character):
 
 if __name__ == "__main__":
     c = Player("Aanks")
-    e = Enemy("Electric Dwarf", 1)
+    e = Enemy("Minus the Goblin", 1)
 
     c.start_fight(e)
