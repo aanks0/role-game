@@ -74,15 +74,9 @@ class Character:
         print("")
 
         run_away = False
-        #        choose = 0
+
         while enemy.is_alive and self.is_alive and not run_away:
             print("")
-            #            while choose < 1 or choose > 3:
-            #                print("### What do you want to do ? ###")
-            #                print("1. Start attacking")
-            #                print("2. Open your inventory")
-            #                print("3. Try to run away")
-            #                choose = 1 if self.pass_next_turn else int(input())
 
             message = "### What do you want to do ? ###"
             fight_menu = [
@@ -144,7 +138,8 @@ class Character:
 
         # Enemy turn
         print(f"{enemy.name} is attacking you")
-        damage = round(randrange(5, 15) * coef, 2)
+        #damage = round(randrange(5, 15) * coef, 2)
+        damage = round(randrange(5, 15), 2)
         if damage == 0:
             print(f"{enemy.name} miss you")
         else:

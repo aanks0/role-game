@@ -34,7 +34,7 @@ class Potion(Object):
                 player.hp = player.max_hp
             print(f"You have now {player.hp}")
             print("")
-            print("You gonna skip your next turn")
+            print("You gonna skip your next turn, except if you are not in fight")
             player.pass_next_turn = True
 
 
