@@ -202,6 +202,7 @@ class Player(Character):
         self.gold = 0
         self.left_weapon = None
         self.right_weapon = None
+        self.enemy_killed = 0
         self.inventory = {
             "Potion": 2,
             "Mana potion": 0,
@@ -258,7 +259,4 @@ class Enemy(Character):
 
 
 if __name__ == "__main__":
-    c = Player("Aanks")
-    e = Enemy("Minus the Goblin", 1)
-
-    c.start_fight(e)
+    pass
